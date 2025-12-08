@@ -79,16 +79,31 @@ export default function Store() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-zinc-800 py-8 px-6 text-center">
-                <p className="text-sm text-zinc-500">
-                    © 2024 Grid & Guard. All rights reserved.
-                </p>
-                <button
-                    onClick={() => setIsContactOpen(true)}
-                    className="mt-2 text-sm text-zinc-400 hover:text-primary transition-colors"
-                >
-                    Customer Support
-                </button>
+            <footer className="border-t border-zinc-800 py-8 px-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-sm text-zinc-500">
+                            © 2024 Grid & Guard. All rights reserved.
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-4 text-sm">
+                            <a href="/terms" className="text-zinc-400 hover:text-primary transition-colors">
+                                Terms of Service
+                            </a>
+                            <a href="/privacy" className="text-zinc-400 hover:text-primary transition-colors">
+                                Privacy Policy
+                            </a>
+                            <a href="/returns" className="text-zinc-400 hover:text-primary transition-colors">
+                                Returns
+                            </a>
+                            <button
+                                onClick={() => setIsContactOpen(true)}
+                                className="text-zinc-400 hover:text-primary transition-colors"
+                            >
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </footer>
 
             {/* Cart Drawer */}
