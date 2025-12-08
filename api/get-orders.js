@@ -79,9 +79,16 @@ export default async function handler(req, res) {
         res.status(200).json({ orders });
     } catch (error) {
         console.error('Error fetching orders:', error);
+
+        // Handle specific Firestore "Not Found" error (Database not created)
+        let errorMessage = error.message;
+        if (errorMessage && errorMessage.includes('5 NOT_FOUND')) {
+            errorMessage = 'Firestore Database not found. Please go to Firebase Console -> Firestore Database and click "Create Database" (in Native mode).';
+        }
+
         res.status(500).json({
             error: 'Failed to fetch orders',
-            details: error.message
+            details: errorMessage
         });
     }
 }
