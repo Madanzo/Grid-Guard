@@ -90,15 +90,29 @@ export default async function handler(req, res) {
         if (errorMessage && errorMessage.includes('5 NOT_FOUND')) {
             errorMessage = `Firestore Database not found for project "${projectId}".`;
 
-            // Try to list actual databases to see what exists
+            // Try to list actual databases using REST API (bypass SDK issues)
             try {
-                const admin = await import('firebase-admin');
-                const dbs = await admin.firestore().listDatabases();
-                const dbNames = dbs.map(db => db.databaseId).join(', ');
-                errorMessage += `\nDEBUG: Found these databases: [${dbNames || 'NONE'}].`;
-                errorMessage += `\nIf your database is in the list, we need to update the code to use it.`;
-            } catch (dbListError) {
-                errorMessage += `\nDEBUG: Could not list databases either (${dbListError.message}).`;
+                const app = getApps()[0];
+                if (app) {
+                    const accessTokenObj = await app.options.credential.getAccessToken();
+                    const token = accessTokenObj.access_token;
+
+                    const listDbUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases`;
+                    const listResponse = await fetch(listDbUrl, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (listResponse.ok) {
+                        const listData = await listResponse.json();
+                        const dbIds = listData.databases ? listData.databases.map(d => d.name.split('/').pop()) : [];
+                        errorMessage += `\nDEBUG: REST API found these databases: [${dbIds.join(', ')}]`;
+                        errorMessage += `\nIf one of these is NOT "(default)", we need to configure it.`;
+                    } else {
+                        errorMessage += `\nDEBUG: REST API Failed: ${listResponse.status} ${listResponse.statusText}`;
+                    }
+                }
+            } catch (restError) {
+                errorMessage += `\nDEBUG: REST API check failed (${restError.message})`;
             }
         }
 
