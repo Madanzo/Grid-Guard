@@ -21,6 +21,9 @@ if (getApps().length === 0) {
             if (serviceAccount.private_key) {
                 serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
             }
+
+            // Store project ID for debugging
+            process.env.FIREBASE_PROJECT_ID_DEBUG = serviceAccount.project_id;
         } catch (e) {
             console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON', e);
             throw new Error(`Invalid JSON in FIREBASE_SERVICE_ACCOUNT_KEY: ${e.message}`);
@@ -82,8 +85,10 @@ export default async function handler(req, res) {
 
         // Handle specific Firestore "Not Found" error (Database not created)
         let errorMessage = error.message;
+        const projectId = process.env.FIREBASE_PROJECT_ID_DEBUG || 'unknown'; // Will set this in code below
+
         if (errorMessage && errorMessage.includes('5 NOT_FOUND')) {
-            errorMessage = 'Firestore Database not found. Please go to Firebase Console -> Firestore Database and click "Create Database" (in Native mode).';
+            errorMessage = `Firestore Database not found for project "${projectId}". \n1. Check if this is the correct Project ID in Firebase Console.\n2. Ensure you created the database in THIS project.`;
         }
 
         res.status(500).json({
@@ -92,3 +97,4 @@ export default async function handler(req, res) {
         });
     }
 }
+```
