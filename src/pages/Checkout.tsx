@@ -136,10 +136,26 @@ export default function Checkout() {
                 total: getTotal(),
             };
 
+            // Save order to Firestore via API (uses server-side Firebase Admin)
+            try {
+                const saveOrderUrl = import.meta.env.DEV
+                    ? 'http://localhost:3001/api/save-order'
+                    : '/api/save-order';
 
+                const saveResponse = await fetch(saveOrderUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order }),
+                });
 
-            // Firestore save temporarily disabled - orders tracked in Stripe
-            console.log('Order ID:', orderId, '- will be tracked in Stripe');
+                if (!saveResponse.ok) {
+                    console.warn('Failed to save order to database, continuing with Stripe...');
+                } else {
+                    console.log('Order saved to database:', orderId);
+                }
+            } catch (saveError) {
+                console.warn('Error saving order, continuing with Stripe...', saveError);
+            }
 
             // Call API to create Stripe checkout session
             const apiUrl = import.meta.env.DEV
