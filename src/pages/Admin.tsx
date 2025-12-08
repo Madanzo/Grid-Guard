@@ -47,31 +47,52 @@ export default function Admin() {
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        // Subscribe to real-time order updates from Firestore
-        const unsubscribe = subscribeToOrders((updatedOrders) => {
-            setOrders(updatedOrders);
-            setIsLoading(false);
+        // Fetch orders from server-side API (bypasses client-side SDK issues)
+        const fetchOrders = async () => {
+            setIsLoading(true);
+            try {
+                const apiUrl = import.meta.env.DEV
+                    ? 'http://localhost:3001/api/get-orders'
+                    : '/api/get-orders';
 
-            // Update selected order if it was updated
-            if (selectedOrder) {
-                const updated = updatedOrders.find(o => o.id === selectedOrder.id);
-                if (updated) {
-                    setSelectedOrder(updated);
-                }
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const data = await response.json();
+                setOrders(data.orders || []);
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+
+                // Fallback to empty list or retry logic could go here
+                toast({
+                    title: 'Connection Error',
+                    description: 'Could not fetch orders. Retrying...',
+                    variant: 'destructive'
+                });
+            } finally {
+                setIsLoading(false);
             }
-        });
+        };
 
-        setIsLoading(true);
+        fetchOrders();
 
-        // Cleanup subscription on unmount
-        return () => unsubscribe();
+        // Poll every 30 seconds to keep updated
+        const intervalId = setInterval(fetchOrders, 30000);
+
+        return () => clearInterval(intervalId);
     }, [isAuthenticated]);
 
     const loadOrders = async () => {
         setIsLoading(true);
         try {
-            const fetchedOrders = await getOrders();
-            setOrders(fetchedOrders);
+            const apiUrl = import.meta.env.DEV
+                ? 'http://localhost:3001/api/get-orders'
+                : '/api/get-orders';
+
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error('Failed to fetch');
+            const data = await response.json();
+            setOrders(data.orders || []);
+            toast({ title: 'Refreshed', description: 'Latest orders loaded.' });
         } catch (error) {
             console.error('Error loading orders:', error);
             toast({ title: 'Error', description: 'Failed to load orders.', variant: 'destructive' });
@@ -92,7 +113,27 @@ export default function Admin() {
 
     const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
         try {
-            await updateOrderStatusInFirestore(orderId, newStatus);
+            const apiUrl = import.meta.env.DEV
+                ? 'http://localhost:3001/api/update-order-status'
+                : '/api/update-order-status';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId, status: newStatus }),
+            });
+
+            if (!response.ok) throw new Error('Failed to update status');
+
+            // Optimistic update local state
+            setOrders(prevOrders =>
+                prevOrders.map(o => o.id === orderId ? { ...o, status: newStatus } : o)
+            );
+
+            if (selectedOrder && selectedOrder.id === orderId) {
+                setSelectedOrder({ ...selectedOrder, status: newStatus });
+            }
+
             toast({ title: 'Status Updated', description: `Order ${orderId} marked as ${newStatus}` });
         } catch (error) {
             console.error('Error updating order status:', error);
