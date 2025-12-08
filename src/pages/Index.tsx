@@ -102,20 +102,20 @@ const Index = () => {
               Grand Opening
             </h1>
 
-            {/* Coming Soon Badge */}
+            {/* Grand Opening Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-medium text-white tracking-widest uppercase">Coming Soon</span>
+              <span className="text-sm font-medium text-white tracking-widest uppercase">Now Open</span>
             </div>
 
             {/* Step 1: Phone */}
             {step === 'phone' && (
               <>
                 <p className="text-lg text-zinc-400 mb-2 animate-fade-in" style={{ animationDelay: "0.15s" }}>
-                  Signup for early access
+                  Join our exclusive list
                 </p>
                 <p className="text-xl md:text-2xl font-bold text-white mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                  GET 25% OFF YOUR PURCHASE
+                  GET EARLY ACCESS TO NEW DROPS
                 </p>
 
                 <form
