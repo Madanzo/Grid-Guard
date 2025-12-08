@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, MessageCircle, Mail, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import ContactModal from "@/components/ContactModal";
 import PasswordModal from "@/components/PasswordModal";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 type SignupStep = 'phone' | 'email' | 'complete';
 
@@ -16,12 +17,27 @@ const Index = () => {
   const [email, setEmail] = useState("");
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+  const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
+
+  // Check if user is already registered and redirect to store
+  useEffect(() => {
+    const savedPhone = localStorage.getItem(STORAGE_KEYS.USER_PHONE);
+    const savedEmail = localStorage.getItem(STORAGE_KEYS.USER_EMAIL);
+
+    if (savedPhone && savedEmail) {
+      // User already registered - redirect to store
+      navigate('/store', { replace: true });
+    } else {
+      // Not registered - show signup form
+      setIsCheckingRegistration(false);
+    }
+  }, [navigate]);
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (phone) {
       // Store phone and move to email step
-      localStorage.setItem('gridGuardPhone', phone);
+      localStorage.setItem(STORAGE_KEYS.USER_PHONE, phone);
       setStep('email');
     }
   };
@@ -30,7 +46,7 @@ const Index = () => {
     e.preventDefault();
     if (email) {
       // Store email and complete signup
-      localStorage.setItem('gridGuardEmail', email);
+      localStorage.setItem(STORAGE_KEYS.USER_EMAIL, email);
       setStep('complete');
 
       toast({
@@ -48,6 +64,15 @@ const Index = () => {
       setStep('phone');
     }
   };
+
+  // Show nothing while checking registration to prevent flash
+  if (isCheckingRegistration) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-zinc-950">
