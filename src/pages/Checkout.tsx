@@ -63,11 +63,22 @@ export default function Checkout() {
         setIsSubmitting(true);
 
         // Validate required fields
-        const { firstName, lastName, email, phone } = customerInfo;
+        const { firstName, lastName, email, phone, address } = customerInfo;
         if (!firstName || !lastName || !email || !phone) {
             toast({
                 title: 'Missing Information',
                 description: 'Please fill in your contact information.',
+                variant: 'destructive',
+            });
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Validate shipping address
+        if (!address.street || !address.city || !address.state || !address.zipCode) {
+            toast({
+                title: 'Missing Address',
+                description: 'Please fill in your complete shipping address.',
                 variant: 'destructive',
             });
             setIsSubmitting(false);
@@ -215,6 +226,68 @@ export default function Checkout() {
                                             className="mt-1 bg-zinc-800 border-zinc-700 text-white"
                                             required
                                         />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Shipping Address */}
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                                <h2 className="text-lg font-semibold text-white mb-4">Shipping Address</h2>
+                                <div className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="street" className="text-zinc-300">Street Address *</Label>
+                                        <Input
+                                            id="street"
+                                            value={customerInfo.address.street}
+                                            onChange={(e) => handleInputChange('address.street', e.target.value)}
+                                            placeholder="123 Main Street"
+                                            className="mt-1 bg-zinc-800 border-zinc-700 text-white"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="apartment" className="text-zinc-300">Apt, Suite, Unit (optional)</Label>
+                                        <Input
+                                            id="apartment"
+                                            value={customerInfo.address.apartment}
+                                            onChange={(e) => handleInputChange('address.apartment', e.target.value)}
+                                            placeholder="Apt 4B"
+                                            className="mt-1 bg-zinc-800 border-zinc-700 text-white"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        <div className="col-span-2 md:col-span-1">
+                                            <Label htmlFor="city" className="text-zinc-300">City *</Label>
+                                            <Input
+                                                id="city"
+                                                value={customerInfo.address.city}
+                                                onChange={(e) => handleInputChange('address.city', e.target.value)}
+                                                className="mt-1 bg-zinc-800 border-zinc-700 text-white"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="state" className="text-zinc-300">State *</Label>
+                                            <Input
+                                                id="state"
+                                                value={customerInfo.address.state}
+                                                onChange={(e) => handleInputChange('address.state', e.target.value)}
+                                                placeholder="TX"
+                                                className="mt-1 bg-zinc-800 border-zinc-700 text-white"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="zipCode" className="text-zinc-300">ZIP Code *</Label>
+                                            <Input
+                                                id="zipCode"
+                                                value={customerInfo.address.zipCode}
+                                                onChange={(e) => handleInputChange('address.zipCode', e.target.value)}
+                                                placeholder="78701"
+                                                className="mt-1 bg-zinc-800 border-zinc-700 text-white"
+                                                required
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
