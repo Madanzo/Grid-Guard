@@ -136,7 +136,10 @@ export default function Checkout() {
                 total: getTotal(),
             };
 
-            // Save order to Firestore (will be updated to 'paid' by webhook)
+
+            // TEMPORARILY DISABLED - Save order to Firestore
+            // TODO: Re-enable after Firestore is properly configured
+            /*
             try {
                 await createOrder(order);
                 console.log('Order saved to Firestore:', orderId);
@@ -150,6 +153,8 @@ export default function Checkout() {
                 setIsSubmitting(false);
                 return;
             }
+            */
+            console.log('Skipping Firestore save (temporarily disabled), orderId:', orderId);
 
             // Call API to create Stripe checkout session
             const apiUrl = import.meta.env.DEV
