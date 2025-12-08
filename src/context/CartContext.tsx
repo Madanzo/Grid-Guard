@@ -123,6 +123,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     const getShipping = () => {
+        // Skip shipping for test product
+        const isTestOrder = items.every(item => item.caseProduct.id === 'test-case');
+        if (isTestOrder) return 0;
+
         const subtotal = getSubtotal();
         return subtotal >= SHIPPING.FREE_THRESHOLD ? 0 : SHIPPING.COST;
     };

@@ -26,9 +26,9 @@ export const caseProducts: CaseProductWithVariants[] = [
     // TEST PRODUCT - Remove after testing!
     {
         id: 'test-case',
-        name: '🧪 TEST CASE ($50 - Free Ship)',
+        name: '🧪 TEST CASE ($1 No Shipping)',
         description: 'Test product for checkout testing - DELETE AFTER TESTING',
-        price: 50.00,
+        price: 1.00,
         variants: [
             { id: 'test-black', name: 'Black', colorHex: '#1a1a1a', image: getImageUrl('Apertura_Black.png') },
         ],
