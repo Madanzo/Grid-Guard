@@ -33,9 +33,8 @@ export default function Admin() {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Admin password - In production, use proper authentication (Firebase Auth, etc.)
-    // This is read from environment variable or falls back to a default for development
-    const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+    // Admin password - TODO: Replace with Firebase Auth in production
+    const ADMIN_PASSWORD = '@Rey1997cam';
 
     useEffect(() => {
         // Check if already authenticated from PasswordModal
