@@ -64,7 +64,7 @@ export default function Admin() {
     const [password, setPassword] = useState('');
 
     // Simple password protection (change this password!)
-    const ADMIN_PASSWORD = 'gridguard2024';
+    const ADMIN_PASSWORD = '@Rey1997cam';
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -192,8 +192,8 @@ export default function Admin() {
                                         key={order.id}
                                         onClick={() => setSelectedOrder(order)}
                                         className={`w-full text-left p-4 rounded-xl border transition-all ${selectedOrder?.id === order.id
-                                                ? 'bg-zinc-800 border-primary'
-                                                : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                                            ? 'bg-zinc-800 border-primary'
+                                            : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
                                             }`}
                                     >
                                         <div className="flex items-start justify-between mb-2">
@@ -248,8 +248,8 @@ export default function Admin() {
                                                 key={status}
                                                 onClick={() => updateOrderStatus(selectedOrder.id, status as Order['status'])}
                                                 className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedOrder.status === status
-                                                        ? config.color + ' ring-2 ring-white/20'
-                                                        : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                                                    ? config.color + ' ring-2 ring-white/20'
+                                                    : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
                                                     }`}
                                             >
                                                 {config.label}

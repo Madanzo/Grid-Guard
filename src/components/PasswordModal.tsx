@@ -10,7 +10,7 @@ interface PasswordModalProps {
   onClose: () => void;
 }
 
-const ADMIN_PASSWORD = "gridguard2024";
+const ADMIN_PASSWORD = "@Rey1997cam";
 
 const PasswordModal = ({ isOpen, onClose }: PasswordModalProps) => {
   const navigate = useNavigate();
