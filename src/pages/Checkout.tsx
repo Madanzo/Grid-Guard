@@ -137,12 +137,26 @@ export default function Checkout() {
             };
 
             // Save order to Firestore (will be updated to 'paid' by webhook)
-            await createOrder(order);
+            try {
+                await createOrder(order);
+                console.log('Order saved to Firestore:', orderId);
+            } catch (firestoreError) {
+                console.error('Firestore error:', firestoreError);
+                toast({
+                    title: 'Database Error',
+                    description: 'Failed to save order. Please try again or contact support.',
+                    variant: 'destructive',
+                });
+                setIsSubmitting(false);
+                return;
+            }
 
             // Call API to create Stripe checkout session
             const apiUrl = import.meta.env.DEV
                 ? 'http://localhost:3001/api/create-checkout-session'
                 : '/api/create-checkout-session';
+
+            console.log('Calling Stripe API:', apiUrl);
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -155,10 +169,18 @@ export default function Checkout() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to create checkout session');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Stripe API error:', response.status, errorData);
+                throw new Error(errorData.error || 'Failed to create checkout session');
             }
 
             const { url } = await response.json();
+
+            if (!url) {
+                throw new Error('No checkout URL received from Stripe');
+            }
+
+            console.log('Redirecting to Stripe:', url);
 
             // Note: Cart is NOT cleared here intentionally.
             // If the user navigates back from Stripe, their cart will still be intact.
@@ -170,7 +192,7 @@ export default function Checkout() {
             console.error('Checkout error:', error);
             toast({
                 title: 'Checkout Failed',
-                description: 'Unable to connect to payment server. Please try again.',
+                description: error instanceof Error ? error.message : 'Unable to connect to payment server. Please try again.',
                 variant: 'destructive',
             });
             setIsSubmitting(false);
