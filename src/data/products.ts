@@ -21,8 +21,20 @@ export interface CaseProductWithVariants extends Omit<CaseProduct, 'image'> {
     defaultVariant: string;
 }
 
-// 8 Case Designs with Color Variants
+// 8 Case Designs with Color Variants (+ 1 Test Case)
 export const caseProducts: CaseProductWithVariants[] = [
+    // TEST PRODUCT - Remove after testing!
+    {
+        id: 'test-case',
+        name: '🧪 TEST CASE ($1)',
+        description: 'Test product for checkout testing - DELETE AFTER TESTING',
+        price: 1.00,
+        variants: [
+            { id: 'test-black', name: 'Black', colorHex: '#1a1a1a', image: getImageUrl('Apertura_Black.png') },
+        ],
+        defaultVariant: 'test-black',
+        temuUrl: '',
+    },
     {
         id: 'apertura',
         name: 'Apertura',
