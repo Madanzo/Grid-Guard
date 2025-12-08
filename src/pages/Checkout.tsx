@@ -137,20 +137,9 @@ export default function Checkout() {
             };
 
 
-            // Save order to Firestore (will be updated to 'paid' by webhook)
-            try {
-                await createOrder(order);
-                console.log('Order saved to Firestore:', orderId);
-            } catch (firestoreError) {
-                console.error('Firestore error:', firestoreError);
-                toast({
-                    title: 'Database Error',
-                    description: 'Failed to save order. Please try again or contact support.',
-                    variant: 'destructive',
-                });
-                setIsSubmitting(false);
-                return;
-            }
+
+            // Firestore save temporarily disabled - orders tracked in Stripe
+            console.log('Order ID:', orderId, '- will be tracked in Stripe');
 
             // Call API to create Stripe checkout session
             const apiUrl = import.meta.env.DEV
