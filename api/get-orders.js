@@ -6,10 +6,29 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin (only once)
 if (getApps().length === 0) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-    initializeApp({
-        credential: cert(serviceAccount),
-    });
+    try {
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (!key) {
+            throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY is missing');
+        }
+
+        // Handle potential parsing issues
+        let serviceAccount;
+        try {
+            serviceAccount = JSON.parse(key);
+        } catch (e) {
+            console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON', e);
+            throw new Error('Invalid JSON in FIREBASE_SERVICE_ACCOUNT_KEY');
+        }
+
+        initializeApp({
+            credential: cert(serviceAccount),
+        });
+        console.log('Firebase Admin initialized successfully');
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        // We continue, but db calls will likely fail
+    }
 }
 
 const db = getFirestore();
