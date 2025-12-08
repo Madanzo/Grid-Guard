@@ -56,17 +56,20 @@ export default function Admin() {
                     : '/api/get-orders';
 
                 const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Failed to fetch');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.details || errorData.error || 'Failed to fetch');
+                }
                 const data = await response.json();
                 setOrders(data.orders || []);
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Failed to load orders:', error);
 
-                // Fallback to empty list or retry logic could go here
                 toast({
                     title: 'Connection Error',
-                    description: 'Could not fetch orders. Retrying...',
-                    variant: 'destructive'
+                    description: error.message || 'Could not fetch orders. Retrying...',
+                    variant: 'destructive',
+                    duration: 5000,
                 });
             } finally {
                 setIsLoading(false);

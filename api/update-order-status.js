@@ -6,10 +6,23 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin (only once)
 if (getApps().length === 0) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-    initializeApp({
-        credential: cert(serviceAccount),
-    });
+    try {
+        const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+        if (!key) throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY is missing');
+
+        let serviceAccount = JSON.parse(key);
+        // FIX: Handle newlines in private key for Vercel env vars
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+
+        initializeApp({
+            credential: cert(serviceAccount),
+        });
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        global.firebaseInitError = error;
+    }
 }
 
 const db = getFirestore();
