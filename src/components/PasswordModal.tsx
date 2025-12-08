@@ -20,6 +20,9 @@ const PasswordModal = ({ isOpen, onClose }: PasswordModalProps) => {
     e.preventDefault();
 
     if (password === ADMIN_PASSWORD) {
+      // Store authentication
+      localStorage.setItem('gridGuardAdminAuth', 'true');
+
       toast({
         title: "Access Granted!",
         description: "Welcome to the admin dashboard.",

@@ -67,6 +67,14 @@ export default function Admin() {
     const ADMIN_PASSWORD = '@Rey1997cam';
 
     useEffect(() => {
+        // Check if already authenticated from PasswordModal
+        const isAuth = localStorage.getItem('gridGuardAdminAuth') === 'true';
+        if (isAuth) {
+            setIsAuthenticated(true);
+        }
+    }, []);
+
+    useEffect(() => {
         if (isAuthenticated) {
             loadOrders();
         }
