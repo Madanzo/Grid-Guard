@@ -12,48 +12,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { Order } from '@/types/store';
+import { STORAGE_KEYS, ORDER_STATUS_CONFIG as statusConfigBase } from '@/lib/constants';
 
-interface OrderItem {
-    caseId: string;
-    caseName: string;
-    casePrice: number;
-    iPhoneModel: string;
-    screenProtector: string;
-    screenProtectorPrice: number;
-    quantity: number;
-    temuCaseUrl?: string;
-    temuScreenProtectorUrl?: string;
-}
-
-interface Order {
-    id: string;
-    createdAt: string;
-    status: 'pending' | 'paid' | 'ordered_from_temu' | 'shipped' | 'delivered';
-    customer: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone: string;
-        address: {
-            street: string;
-            apartment?: string;
-            city: string;
-            state: string;
-            zipCode: string;
-        };
-    };
-    items: OrderItem[];
-    subtotal: number;
-    shipping: number;
-    total: number;
-}
-
+// Extend status config with icons for UI
 const statusConfig = {
-    pending: { label: 'Pending', color: 'bg-yellow-500/20 text-yellow-400', icon: Clock },
-    paid: { label: 'Paid', color: 'bg-blue-500/20 text-blue-400', icon: CheckCircle },
-    ordered_from_temu: { label: 'Ordered from Temu', color: 'bg-purple-500/20 text-purple-400', icon: ShoppingCart },
-    shipped: { label: 'Shipped', color: 'bg-orange-500/20 text-orange-400', icon: Truck },
-    delivered: { label: 'Delivered', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
+    pending: { ...statusConfigBase.pending, icon: Clock },
+    paid: { ...statusConfigBase.paid, icon: CheckCircle },
+    ordered_from_temu: { ...statusConfigBase.ordered_from_temu, icon: ShoppingCart },
+    shipped: { ...statusConfigBase.shipped, icon: Truck },
+    delivered: { ...statusConfigBase.delivered, icon: CheckCircle },
 };
 
 export default function Admin() {
@@ -63,8 +31,9 @@ export default function Admin() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
 
-    // Simple password protection (change this password!)
-    const ADMIN_PASSWORD = '@Rey1997cam';
+    // Admin password - In production, use proper authentication (Firebase Auth, etc.)
+    // This is read from environment variable or falls back to a default for development
+    const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
 
     useEffect(() => {
         // Check if already authenticated from PasswordModal

@@ -209,6 +209,9 @@ export const screenProtectors: ScreenProtector[] = [
     },
 ];
 
-// Shipping cost
+// Re-export shipping constants from centralized location for backwards compatibility
+export { SHIPPING } from '@/lib/constants';
+
+// For backwards compatibility with existing imports
 export const SHIPPING_COST = 4.99;
 export const FREE_SHIPPING_THRESHOLD = 50;

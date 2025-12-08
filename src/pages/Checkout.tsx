@@ -10,7 +10,7 @@ import { CustomerInfo } from '@/types/store';
 
 export default function Checkout() {
     const navigate = useNavigate();
-    const { items, getSubtotal, getShipping, getTotal, clearCart } = useCart();
+    const { items, getSubtotal, getShipping, getTotal } = useCart();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -128,8 +128,9 @@ export default function Checkout() {
 
             const { url } = await response.json();
 
-            // Clear cart before redirect
-            clearCart();
+            // Note: Cart is NOT cleared here intentionally.
+            // If the user navigates back from Stripe, their cart will still be intact.
+            // The cart is cleared in OrderSuccess.tsx after payment verification.
 
             // Redirect to Stripe Checkout
             window.location.href = url;

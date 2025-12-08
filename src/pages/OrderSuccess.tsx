@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/context/CartContext';
 
 interface Order {
     id: string;
@@ -24,6 +25,7 @@ export default function OrderSuccess() {
     const [searchParams] = useSearchParams();
     const [isVerifying, setIsVerifying] = useState(false);
     const [order, setOrder] = useState<Order | null>(location.state?.order || null);
+    const { clearCart } = useCart();
 
     // Check for Stripe redirect
     const sessionId = searchParams.get('session_id');
@@ -46,6 +48,9 @@ export default function OrderSuccess() {
             const data = await response.json();
 
             if (data.paid) {
+                // Payment confirmed - now safe to clear the cart!
+                clearCart();
+
                 // Update order status in localStorage
                 const orders = JSON.parse(localStorage.getItem('gridGuardOrders') || '[]');
                 const updatedOrders = orders.map((o: Order) => {

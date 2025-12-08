@@ -3,12 +3,41 @@ import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export default async function handler(req, res) {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
+// Allowed origins for CORS - update these with your actual domains
+const ALLOWED_ORIGINS = [
+    'https://gridandguard.com',
+    'https://www.gridandguard.com',
+];
+
+// Add development origins
+if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV === 'preview') {
+    ALLOWED_ORIGINS.push(
+        'http://localhost:5173',
+        'http://localhost:8080',
+        'http://localhost:3000'
+    );
+}
+
+/**
+ * Set CORS headers with origin validation
+ */
+function setCorsHeaders(req, res) {
+    const origin = req.headers.origin;
+
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+}
 
+export default async function handler(req, res) {
+    // Set CORS headers
+    setCorsHeaders(req, res);
+
+    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -19,6 +48,19 @@ export default async function handler(req, res) {
 
     try {
         const { items, customerInfo, orderId } = req.body;
+
+        // Validate required fields
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: 'Items are required' });
+        }
+
+        if (!customerInfo?.email) {
+            return res.status(400).json({ error: 'Customer email is required' });
+        }
+
+        if (!orderId) {
+            return res.status(400).json({ error: 'Order ID is required' });
+        }
 
         // Build line items for Stripe
         const lineItems = items.map((item) => ({
@@ -39,7 +81,10 @@ export default async function handler(req, res) {
             0
         );
 
-        if (subtotal < 50) {
+        const FREE_SHIPPING_THRESHOLD = 50;
+        const SHIPPING_COST_CENTS = 499; // $4.99
+
+        if (subtotal < FREE_SHIPPING_THRESHOLD) {
             lineItems.push({
                 price_data: {
                     currency: 'usd',
@@ -47,7 +92,7 @@ export default async function handler(req, res) {
                         name: 'Shipping',
                         description: 'Standard shipping',
                     },
-                    unit_amount: 499,
+                    unit_amount: SHIPPING_COST_CENTS,
                 },
                 quantity: 1,
             });
@@ -67,8 +112,8 @@ export default async function handler(req, res) {
             metadata: {
                 orderId,
                 customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
-                customerPhone: customerInfo.phone,
-                shippingAddress: JSON.stringify(customerInfo.address),
+                customerPhone: customerInfo.phone || '',
+                shippingAddress: JSON.stringify(customerInfo.address || {}),
             },
             shipping_address_collection: {
                 allowed_countries: ['US'],
@@ -77,7 +122,15 @@ export default async function handler(req, res) {
 
         res.status(200).json({ url: session.url, sessionId: session.id });
     } catch (error) {
-        console.error('Stripe error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Stripe checkout error:', error);
+
+        // Don't expose internal error details to client
+        const isStripeError = error?.type?.startsWith('Stripe');
+        res.status(500).json({
+            error: isStripeError
+                ? 'Payment processing error. Please try again.'
+                : 'An unexpected error occurred. Please try again.'
+        });
     }
 }
+

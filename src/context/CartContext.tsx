@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { CartItem, CaseProduct, iPhoneModel, ScreenProtector } from '@/types/store';
 import { screenProtectors } from '@/data/products';
+import { SHIPPING, STORAGE_KEYS } from '@/lib/constants';
 
 interface CartContextType {
     items: CartItem[];
@@ -17,11 +18,44 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const FREE_SHIPPING_THRESHOLD = 50;
-const SHIPPING_COST = 4.99;
+/**
+ * Load cart from localStorage
+ */
+function loadCartFromStorage(): CartItem[] {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEYS.CART);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Validate that it's an array
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to load cart from localStorage:', error);
+    }
+    return [];
+}
+
+/**
+ * Save cart to localStorage
+ */
+function saveCartToStorage(items: CartItem[]): void {
+    try {
+        localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(items));
+    } catch (error) {
+        console.warn('Failed to save cart to localStorage:', error);
+    }
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>([]);
+    // Initialize state from localStorage
+    const [items, setItems] = useState<CartItem[]>(() => loadCartFromStorage());
+
+    // Persist to localStorage whenever cart changes
+    useEffect(() => {
+        saveCartToStorage(items);
+    }, [items]);
 
     const addToCart = (
         caseProduct: CaseProduct,
@@ -90,7 +124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const getShipping = () => {
         const subtotal = getSubtotal();
-        return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+        return subtotal >= SHIPPING.FREE_THRESHOLD ? 0 : SHIPPING.COST;
     };
 
     const getTotal = () => {
@@ -126,3 +160,4 @@ export function useCart() {
     }
     return context;
 }
+
