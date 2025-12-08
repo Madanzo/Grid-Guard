@@ -17,6 +17,9 @@ interface ProductCardProps {
     product: CaseProductWithVariants;
 }
 
+// Maximum number of color swatches to show before "+X more"
+const MAX_VISIBLE_SWATCHES = 6;
+
 export default function ProductCard({ product }: ProductCardProps) {
     const [selectedVariant, setSelectedVariant] = useState<ColorVariant>(
         product.variants.find(v => v.id === product.defaultVariant) || product.variants[0]
@@ -24,6 +27,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     const [selectedModel, setSelectedModel] = useState<iPhoneModel | null>(null);
     const [isAdded, setIsAdded] = useState(false);
     const { addToCart } = useCart();
+
+    // Split variants into visible and hidden
+    const visibleVariants = product.variants.slice(0, MAX_VISIBLE_SWATCHES);
+    const hiddenCount = product.variants.length - MAX_VISIBLE_SWATCHES;
 
     const handleAddToCart = () => {
         if (!selectedModel) {
@@ -57,7 +64,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     };
 
     return (
-        <div className="group bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300">
+        <div className="group bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col h-full">
             {/* Product Image */}
             <div className="aspect-square relative overflow-hidden bg-zinc-800">
                 <img
@@ -73,34 +80,44 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
 
             {/* Product Info */}
-            <div className="p-5">
+            <div className="p-5 flex flex-col flex-1">
+                {/* Name and Price */}
                 <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-semibold text-white">{product.name}</h3>
                     <span className="text-lg font-bold text-primary">${product.price.toFixed(2)}</span>
                 </div>
 
-                <p className="text-sm text-zinc-400 mb-4 line-clamp-2">{product.description}</p>
+                {/* Description - fixed to 2 lines */}
+                <p className="text-sm text-zinc-400 mb-4 line-clamp-2 min-h-[2.5rem]">{product.description}</p>
 
-                {/* Color Variants */}
+                {/* Color Variants - fixed height section */}
                 {product.variants.length > 1 && (
-                    <div className="mb-4">
+                    <div className="mb-4 h-[52px]">
                         <p className="text-xs text-zinc-500 mb-2">Color: {selectedVariant.name}</p>
-                        <div className="flex flex-wrap gap-2">
-                            {product.variants.map((variant) => (
+                        <div className="flex items-center gap-2">
+                            {visibleVariants.map((variant) => (
                                 <button
                                     key={variant.id}
                                     onClick={() => setSelectedVariant(variant)}
-                                    className={`w-8 h-8 rounded-full border-2 transition-all ${selectedVariant.id === variant.id
-                                            ? 'border-primary scale-110'
-                                            : 'border-zinc-600 hover:border-zinc-400'
+                                    className={`w-7 h-7 rounded-full border-2 transition-all flex-shrink-0 ${selectedVariant.id === variant.id
+                                        ? 'border-primary scale-110'
+                                        : 'border-zinc-600 hover:border-zinc-400'
                                         }`}
                                     style={{ backgroundColor: variant.colorHex }}
                                     title={variant.name}
                                 />
                             ))}
+                            {hiddenCount > 0 && (
+                                <span className="text-xs text-zinc-500 ml-1">
+                                    +{hiddenCount}
+                                </span>
+                            )}
                         </div>
                     </div>
                 )}
+
+                {/* Spacer to push bottom content down */}
+                <div className="flex-1" />
 
                 {/* Included Badge */}
                 <div className="flex items-center gap-2 mb-4 text-xs text-zinc-500">
@@ -135,8 +152,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <Button
                     onClick={handleAddToCart}
                     className={`w-full ${isAdded
-                            ? 'bg-green-600 hover:bg-green-600'
-                            : 'bg-primary hover:bg-primary/90'
+                        ? 'bg-green-600 hover:bg-green-600'
+                        : 'bg-primary hover:bg-primary/90'
                         } transition-colors`}
                 >
                     {isAdded ? (
@@ -155,3 +172,4 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
     );
 }
+
