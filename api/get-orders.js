@@ -83,12 +83,23 @@ export default async function handler(req, res) {
     } catch (error) {
         console.error('Error fetching orders:', error);
 
-        // Handle specific Firestore "Not Found" error (Database not created)
+        // Handle specific Firestore "Not Found" error
         let errorMessage = error.message;
-        const projectId = process.env.FIREBASE_PROJECT_ID_DEBUG || 'unknown'; // Will set this in code below
+        const projectId = process.env.FIREBASE_PROJECT_ID_DEBUG || 'unknown';
 
         if (errorMessage && errorMessage.includes('5 NOT_FOUND')) {
-            errorMessage = `Firestore Database not found for project "${projectId}". \n1. Check if this is the correct Project ID in Firebase Console.\n2. Ensure you created the database in THIS project.`;
+            errorMessage = `Firestore Database not found for project "${projectId}".`;
+
+            // Try to list actual databases to see what exists
+            try {
+                const admin = await import('firebase-admin');
+                const dbs = await admin.firestore().listDatabases();
+                const dbNames = dbs.map(db => db.databaseId).join(', ');
+                errorMessage += `\nDEBUG: Found these databases: [${dbNames || 'NONE'}].`;
+                errorMessage += `\nIf your database is in the list, we need to update the code to use it.`;
+            } catch (dbListError) {
+                errorMessage += `\nDEBUG: Could not list databases either (${dbListError.message}).`;
+            }
         }
 
         res.status(500).json({
@@ -97,3 +108,4 @@ export default async function handler(req, res) {
         });
     }
 }
+
