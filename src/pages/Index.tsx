@@ -139,9 +139,16 @@ const Index = () => {
                 <p className="text-lg text-zinc-400 mb-2 animate-fade-in" style={{ animationDelay: "0.15s" }}>
                   Join our exclusive list
                 </p>
-                <p className="text-xl md:text-2xl font-bold text-white mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+                <p className="text-xl md:text-2xl font-bold text-white mb-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
                   GET EARLY ACCESS TO NEW DROPS
                 </p>
+
+                {/* Lifetime Replacements Badge */}
+                <div className="flex items-center justify-center gap-2 mb-8 animate-fade-in" style={{ animationDelay: "0.22s" }}>
+                  <div className="px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full">
+                    <span className="text-sm text-green-400 font-medium">✨ Sign up for LIFETIME REPLACEMENTS</span>
+                  </div>
+                </div>
 
                 <form
                   onSubmit={handlePhoneSubmit}
@@ -176,8 +183,8 @@ const Index = () => {
                 <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: "0.3s" }}>
                   By submitting this form, you consent to receive marketing text messages from Grid & Guard.
                   Consent is not a condition of any purchase. Message and data rates may apply.{" "}
-                  <a href="#" className="text-primary hover:underline">Privacy Policy</a> &{" "}
-                  <a href="#" className="text-primary hover:underline">Terms</a>.
+                  <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a> &{" "}
+                  <a href="/terms" className="text-primary hover:underline">Terms</a>.
                 </p>
               </>
             )}
