@@ -30,6 +30,19 @@ export interface CartItem {
     quantity: number;
 }
 
+// OrderItem is the flattened format stored in Firestore
+export interface OrderItem {
+    caseName: string;
+    casePrice: number;
+    iPhoneModel: string;
+    screenProtector: string;
+    screenProtectorPrice: number;
+    quantity: number;
+    image?: string;
+    temuCaseUrl?: string;
+    temuScreenProtectorUrl?: string;
+}
+
 export interface CustomerInfo {
     firstName: string;
     lastName: string;
@@ -49,10 +62,12 @@ export interface Order {
     createdAt: string;
     status: 'pending' | 'paid' | 'ordered_from_temu' | 'shipped' | 'delivered';
     customer: CustomerInfo;
-    items: CartItem[];
+    items: OrderItem[];  // Uses flattened format for storage
     subtotal: number;
     shipping: number;
     total: number;
     stripePaymentId?: string;
+    stripeSessionId?: string;
+    paidAt?: string;
     temuOrderId?: string;
 }

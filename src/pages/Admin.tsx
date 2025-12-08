@@ -13,7 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Order } from '@/types/store';
-import { STORAGE_KEYS, ORDER_STATUS_CONFIG as statusConfigBase } from '@/lib/constants';
+import { ORDER_STATUS_CONFIG as statusConfigBase } from '@/lib/constants';
+import { subscribeToOrders, updateOrderStatus as updateOrderStatusInFirestore, getOrders } from '@/lib/orderService';
 
 // Extend status config with icons for UI
 const statusConfig = {
@@ -30,6 +31,7 @@ export default function Admin() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     // Admin password - In production, use proper authentication (Firebase Auth, etc.)
     // This is read from environment variable or falls back to a default for development
@@ -44,18 +46,39 @@ export default function Admin() {
     }, []);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            loadOrders();
-        }
+        if (!isAuthenticated) return;
+
+        // Subscribe to real-time order updates from Firestore
+        const unsubscribe = subscribeToOrders((updatedOrders) => {
+            setOrders(updatedOrders);
+            setIsLoading(false);
+
+            // Update selected order if it was updated
+            if (selectedOrder) {
+                const updated = updatedOrders.find(o => o.id === selectedOrder.id);
+                if (updated) {
+                    setSelectedOrder(updated);
+                }
+            }
+        });
+
+        setIsLoading(true);
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
     }, [isAuthenticated]);
 
-    const loadOrders = () => {
-        const storedOrders = JSON.parse(localStorage.getItem('gridGuardOrders') || '[]');
-        // Sort by date, newest first
-        storedOrders.sort((a: Order, b: Order) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        setOrders(storedOrders);
+    const loadOrders = async () => {
+        setIsLoading(true);
+        try {
+            const fetchedOrders = await getOrders();
+            setOrders(fetchedOrders);
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            toast({ title: 'Error', description: 'Failed to load orders.', variant: 'destructive' });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleLogin = (e: React.FormEvent) => {
@@ -68,18 +91,14 @@ export default function Admin() {
         }
     };
 
-    const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-        const updatedOrders = orders.map((order) =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-        );
-        setOrders(updatedOrders);
-        localStorage.setItem('gridGuardOrders', JSON.stringify(updatedOrders));
-
-        if (selectedOrder?.id === orderId) {
-            setSelectedOrder({ ...selectedOrder, status: newStatus });
+    const handleUpdateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+        try {
+            await updateOrderStatusInFirestore(orderId, newStatus);
+            toast({ title: 'Status Updated', description: `Order ${orderId} marked as ${newStatus}` });
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            toast({ title: 'Error', description: 'Failed to update order status.', variant: 'destructive' });
         }
-
-        toast({ title: 'Status Updated', description: `Order ${orderId} marked as ${newStatus}` });
     };
 
     const openTemuLinks = (order: Order) => {
@@ -223,7 +242,7 @@ export default function Admin() {
                                         {Object.entries(statusConfig).map(([status, config]) => (
                                             <button
                                                 key={status}
-                                                onClick={() => updateOrderStatus(selectedOrder.id, status as Order['status'])}
+                                                onClick={() => handleUpdateOrderStatus(selectedOrder.id, status as Order['status'])}
                                                 className={`text-xs px-3 py-1.5 rounded-full transition-all ${selectedOrder.status === status
                                                     ? config.color + ' ring-2 ring-white/20'
                                                     : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'

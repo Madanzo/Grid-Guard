@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { CustomerInfo } from '@/types/store';
+import { CustomerInfo, Order } from '@/types/store';
+import { createOrder } from '@/lib/orderService';
 
 type CheckoutStep = 'info' | 'payment';
 
@@ -123,22 +124,20 @@ export default function Checkout() {
                 temuCaseUrl: item.caseProduct.temuUrl,
             }));
 
-            // Create order object for local storage
+            // Create order object for Firestore
             const order = {
                 id: orderId,
                 createdAt: new Date().toISOString(),
-                status: 'pending',
+                status: 'pending' as const,
                 customer: customerInfo,
-                items: stripeItems,
+                items: stripeItems as unknown as Order['items'],
                 subtotal: getSubtotal(),
                 shipping: getShipping(),
                 total: getTotal(),
             };
 
-            // Save order locally first
-            const existingOrders = JSON.parse(localStorage.getItem('gridGuardOrders') || '[]');
-            existingOrders.push(order);
-            localStorage.setItem('gridGuardOrders', JSON.stringify(existingOrders));
+            // Save order to Firestore (will be updated to 'paid' by webhook)
+            await createOrder(order);
 
             // Call API to create Stripe checkout session
             const apiUrl = import.meta.env.DEV

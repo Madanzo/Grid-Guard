@@ -1,6 +1,7 @@
 // Firebase configuration for Grid & Guard
 import { initializeApp } from 'firebase/app';
 import { getStorage } from 'firebase/storage';
+import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration using environment variables
 // Set these in your .env file (see .env.example)
@@ -33,5 +34,8 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Cloud Storage
 export const storage = getStorage(app);
+
+// Initialize Firestore
+export const db = getFirestore(app);
 
 export default app;
