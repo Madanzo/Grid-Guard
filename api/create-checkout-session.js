@@ -5,8 +5,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Allowed origins for CORS - update these with your actual domains
 const ALLOWED_ORIGINS = [
-    'https://gridandguard.com',
-    'https://www.gridandguard.com',
+    'https://gridnguard.com',
+    'https://www.gridnguard.com',
 ];
 
 // Add development origins
