@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,18 +10,30 @@ interface PasswordModalProps {
   onClose: () => void;
 }
 
+const ADMIN_PASSWORD = "gridguard2024";
+
 const PasswordModal = ({ isOpen, onClose }: PasswordModalProps) => {
+  const navigate = useNavigate();
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo purposes, any password works
-    toast({
-      title: "Access Granted!",
-      description: "Welcome to the exclusive collection.",
-    });
-    onClose();
-    setPassword("");
+
+    if (password === ADMIN_PASSWORD) {
+      toast({
+        title: "Access Granted!",
+        description: "Welcome to the admin dashboard.",
+      });
+      onClose();
+      setPassword("");
+      navigate('/admin');
+    } else {
+      toast({
+        title: "Invalid Password",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!isOpen) return null;
@@ -33,7 +46,7 @@ const PasswordModal = ({ isOpen, onClose }: PasswordModalProps) => {
       />
       <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl animate-slide-up overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-50" />
-        
+
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted transition-colors duration-200"
@@ -47,12 +60,12 @@ const PasswordModal = ({ isOpen, onClose }: PasswordModalProps) => {
               <Lock className="w-6 h-6 text-primary" />
             </div>
           </div>
-          
+
           <h2 className="text-center text-2xl font-heading font-bold text-foreground mb-2">
-            Enter password
+            Admin Access
           </h2>
           <p className="text-center text-muted-foreground text-sm mb-6">
-            This store is password protected. Enter the password to access.
+            Enter your admin password to access the dashboard.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
