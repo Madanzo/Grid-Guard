@@ -112,9 +112,11 @@ const Index = () => {
                 <ArrowLeft className="w-5 h-5 text-zinc-400" />
               </button>
             )}
-            <span className="font-heading text-xl md:text-2xl font-bold tracking-tight text-white">
-              Grid<span className="text-primary">&</span>Guard
-            </span>
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/nimble-climber-454903-d3.firebasestorage.app/o/Logo%2FGrid%20%26%20Guard.png?alt=media"
+              alt="Grid & Guard"
+              className="h-10 md:h-12 w-auto"
+            />
           </div>
 
           {/* Enter Password Button */}
