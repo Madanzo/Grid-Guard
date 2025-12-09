@@ -28,7 +28,11 @@ function loadCartFromStorage(): CartItem[] {
             const parsed = JSON.parse(saved);
             // Validate that it's an array
             if (Array.isArray(parsed)) {
-                return parsed;
+                // Filter out test products that might be stuck in localStorage
+                return parsed.filter((item: any) => {
+                    const name = item.caseProduct?.name || '';
+                    return !name.toUpperCase().includes('TEST') && !name.includes('No Shipping');
+                });
             }
         }
     } catch (error) {
@@ -123,10 +127,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     const getShipping = () => {
-        // Skip shipping for test product
-        const isTestOrder = items.every(item => item.caseProduct.id === 'test-case');
-        if (isTestOrder) return 0;
-
         const subtotal = getSubtotal();
         return subtotal >= SHIPPING.FREE_THRESHOLD ? 0 : SHIPPING.COST;
     };

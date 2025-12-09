@@ -72,9 +72,11 @@ export default function Store() {
             {/* Products Grid */}
             <section className="max-w-7xl mx-auto px-6 pb-20">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {caseProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
+                    {caseProducts
+                        .filter(p => !p.name.toUpperCase().includes('TEST'))
+                        .map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
                 </div>
             </section>
 
