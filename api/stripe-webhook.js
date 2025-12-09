@@ -18,7 +18,7 @@ if (getApps().length === 0) {
     });
 }
 
-const db = getFirestore();
+const db = getFirestore(undefined, 'us-central');
 const ORDERS_COLLECTION = 'orders';
 
 export const config = {

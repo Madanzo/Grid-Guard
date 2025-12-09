@@ -40,7 +40,7 @@ if (getApps().length === 0) {
     }
 }
 
-const db = getFirestore();
+const db = getFirestore(undefined, 'us-central');
 const ORDERS_COLLECTION = 'orders';
 
 // CORS headers
@@ -82,44 +82,9 @@ export default async function handler(req, res) {
         res.status(200).json({ orders });
     } catch (error) {
         console.error('Error fetching orders:', error);
-
-        // Handle specific Firestore "Not Found" error
-        let errorMessage = error.message;
-        const projectId = process.env.FIREBASE_PROJECT_ID_DEBUG || 'unknown';
-
-        if (errorMessage && errorMessage.includes('5 NOT_FOUND')) {
-            errorMessage = `Firestore Database not found for project "${projectId}".`;
-
-            // Try to list actual databases using REST API (bypass SDK issues)
-            try {
-                const app = getApps()[0];
-                if (app) {
-                    const accessTokenObj = await app.options.credential.getAccessToken();
-                    const token = accessTokenObj.access_token;
-
-                    const listDbUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases`;
-                    const listResponse = await fetch(listDbUrl, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-
-                    if (listResponse.ok) {
-                        const listData = await listResponse.json();
-                        const dbIds = listData.databases ? listData.databases.map(d => d.name.split('/').pop()) : [];
-                        errorMessage += `\nDEBUG: REST API found these databases: [${dbIds.join(', ')}]`;
-                        errorMessage += `\nIf one of these is NOT "(default)", we need to configure it.`;
-                    } else {
-                        errorMessage += `\nDEBUG: REST API Failed: ${listResponse.status} ${listResponse.statusText}`;
-                    }
-                }
-            } catch (restError) {
-                errorMessage += `\nDEBUG: REST API check failed (${restError.message})`;
-            }
-        }
-
         res.status(500).json({
             error: 'Failed to fetch orders',
-            details: errorMessage
+            details: error.message
         });
     }
 }
-
