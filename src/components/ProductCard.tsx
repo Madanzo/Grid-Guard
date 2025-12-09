@@ -17,9 +17,6 @@ interface ProductCardProps {
     product: CaseProductWithVariants;
 }
 
-// Maximum number of color swatches to show before "+X more"
-const MAX_VISIBLE_SWATCHES = 6;
-
 export default function ProductCard({ product }: ProductCardProps) {
     const [selectedVariant, setSelectedVariant] = useState<ColorVariant>(
         product.variants.find(v => v.id === product.defaultVariant) || product.variants[0]
@@ -27,10 +24,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     const [selectedModel, setSelectedModel] = useState<iPhoneModel | null>(null);
     const [isAdded, setIsAdded] = useState(false);
     const { addToCart } = useCart();
-
-    // Split variants into visible and hidden
-    const visibleVariants = product.variants.slice(0, MAX_VISIBLE_SWATCHES);
-    const hiddenCount = product.variants.length - MAX_VISIBLE_SWATCHES;
 
     const handleAddToCart = () => {
         if (!selectedModel) {
@@ -81,25 +74,23 @@ export default function ProductCard({ product }: ProductCardProps) {
 
             {/* Product Info */}
             <div className="p-5 flex flex-col flex-1">
-                {/* Name and Price */}
                 <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-semibold text-white">{product.name}</h3>
                     <span className="text-lg font-bold text-primary">${product.price.toFixed(2)}</span>
                 </div>
 
-                {/* Description - fixed to 2 lines */}
-                <p className="text-sm text-zinc-400 mb-4 line-clamp-2 min-h-[2.5rem]">{product.description}</p>
+                <p className="text-sm text-zinc-400 mb-4 line-clamp-2">{product.description}</p>
 
-                {/* Color Variants - fixed height section */}
+                {/* Color Variants */}
                 {product.variants.length > 1 && (
-                    <div className="mb-4 h-[52px]">
+                    <div className="mb-4">
                         <p className="text-xs text-zinc-500 mb-2">Color: {selectedVariant.name}</p>
-                        <div className="flex items-center gap-2">
-                            {visibleVariants.map((variant) => (
+                        <div className="flex flex-wrap gap-2">
+                            {product.variants.map((variant) => (
                                 <button
                                     key={variant.id}
                                     onClick={() => setSelectedVariant(variant)}
-                                    className={`w-7 h-7 rounded-full border-2 transition-all flex-shrink-0 ${selectedVariant.id === variant.id
+                                    className={`w-8 h-8 rounded-full border-2 transition-all ${selectedVariant.id === variant.id
                                         ? 'border-primary scale-110'
                                         : 'border-zinc-600 hover:border-zinc-400'
                                         }`}
@@ -107,17 +98,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     title={variant.name}
                                 />
                             ))}
-                            {hiddenCount > 0 && (
-                                <span className="text-xs text-zinc-500 ml-1">
-                                    +{hiddenCount}
-                                </span>
-                            )}
                         </div>
                     </div>
                 )}
-
-                {/* Spacer to push bottom content down */}
-                <div className="flex-1" />
 
                 {/* Included Badge */}
                 <div className="flex items-center gap-2 mb-4 text-xs text-zinc-500">
@@ -125,51 +108,53 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <span>Includes free screen protector</span>
                 </div>
 
-                {/* iPhone Model Selector */}
-                <Select
-                    onValueChange={(value) => {
-                        const model = iPhoneModels.find((m) => m.id === value);
-                        setSelectedModel(model || null);
-                    }}
-                >
-                    <SelectTrigger className="w-full mb-3 bg-zinc-800 border-zinc-700 text-white">
-                        <SelectValue placeholder="Select iPhone Model" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-800 border-zinc-700">
-                        {iPhoneModels.map((model) => (
-                            <SelectItem
-                                key={model.id}
-                                value={model.id}
-                                className="text-white hover:bg-zinc-700 focus:bg-zinc-700"
-                            >
-                                {model.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                {/* Actions Wrapper - Pushes to bottom */}
+                <div className="mt-auto">
+                    {/* iPhone Model Selector */}
+                    <Select
+                        onValueChange={(value) => {
+                            const model = iPhoneModels.find((m) => m.id === value);
+                            setSelectedModel(model || null);
+                        }}
+                    >
+                        <SelectTrigger className="w-full mb-3 bg-zinc-800 border-zinc-700 text-white">
+                            <SelectValue placeholder="Select iPhone Model" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-800 border-zinc-700">
+                            {iPhoneModels.map((model) => (
+                                <SelectItem
+                                    key={model.id}
+                                    value={model.id}
+                                    className="text-white hover:bg-zinc-700 focus:bg-zinc-700"
+                                >
+                                    {model.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
-                {/* Add to Cart Button */}
-                <Button
-                    onClick={handleAddToCart}
-                    className={`w-full ${isAdded
-                        ? 'bg-green-600 hover:bg-green-600'
-                        : 'bg-primary hover:bg-primary/90'
-                        } transition-colors`}
-                >
-                    {isAdded ? (
-                        <>
-                            <Check className="w-4 h-4 mr-2" />
-                            Added!
-                        </>
-                    ) : (
-                        <>
-                            <ShoppingCart className="w-4 h-4 mr-2" />
-                            Add to Cart
-                        </>
-                    )}
-                </Button>
+                    {/* Add to Cart Button */}
+                    <Button
+                        onClick={handleAddToCart}
+                        className={`w-full ${isAdded
+                            ? 'bg-green-600 hover:bg-green-600'
+                            : 'bg-primary hover:bg-primary/90'
+                            } transition-colors`}
+                    >
+                        {isAdded ? (
+                            <>
+                                <Check className="w-4 h-4 mr-2" />
+                                Added!
+                            </>
+                        ) : (
+                            <>
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Add to Cart
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
         </div>
     );
 }
-
