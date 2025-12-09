@@ -75,17 +75,28 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-zinc-950">
-      {/* Dark Textured Background */}
+    <div className="min-h-screen min-h-[100dvh] relative overflow-hidden bg-zinc-950">
+      {/* Full-screen Background Image with pulse animation */}
       <div
-        className="absolute inset-0 opacity-30"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat animate-pulse"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("https://firebasestorage.googleapis.com/v0/b/nimble-climber-454903-d3.firebasestorage.app/o/cases%2Fbackground.png?alt=media")`,
+          animation: 'bgPulse 4s ease-in-out infinite',
         }}
       />
+      <style>{`
+        @keyframes bgPulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+      `}</style>
 
-      {/* Subtle Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/50 via-transparent to-zinc-900/80" />
+      {/* Dark Overlay for readability */}
+      <div className="fixed inset-0 bg-black/50" />
+
+      {/* Center gradient overlay for text readability */}
+      <div className="fixed inset-0 bg-gradient-radial from-black/70 via-black/50 to-transparent"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)' }} />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col">
